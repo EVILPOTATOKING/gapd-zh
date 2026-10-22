@@ -7,6 +7,8 @@
 
 ## 打开方式
 
+**在线版**:https://evilpotatoking.github.io/gapd-zh/ (推送到 main 后自动更新,在线版没有 PDF 按钮)
+
 **只在本机看**:双击 `index.html`。
 
 **局域网访问**(同一 Wi-Fi 下的手机、电脑都能打开):
