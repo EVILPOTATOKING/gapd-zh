@@ -192,6 +192,9 @@ window.GAPD = (function () {
     INFO,
     issues,
     byId,
-    pdfHref: (page) => `${PDF_FILE}#page=${page + PDF_PAGE_OFFSET}`,
+    // 公网版(GitHub Pages)没有 PDF,返回 null 让页面隐藏 PDF 按钮
+    pdfHref: (page) => location.hostname.endsWith("github.io")
+      ? null
+      : `${PDF_FILE}#page=${page + PDF_PAGE_OFFSET}`,
   };
 })();

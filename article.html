@@ -52,8 +52,9 @@
       const pages = a.endPage ? `pp. ${a.page}–${a.endPage}` : `p. ${a.page}`;
       const facts = el("div", "facts");
       facts.append(el("span", null, pages));
+      const pdfUrl = GAPD.pdfHref(a.page);
       const pdf = el("a", "btn");
-      pdf.href = GAPD.pdfHref(a.page);
+      pdf.href = pdfUrl;
       pdf.target = "_blank";
       pdf.appendChild(Bi.seg({ zh: "在 PDF 中打开原文 ↗", en: "Open original in PDF ↗" }));
 
@@ -63,7 +64,7 @@
         el("div", "a", a.authors),
         facts,
       );
-      facts.appendChild(pdf);
+      if (pdfUrl) facts.appendChild(pdf);
 
       const setTitle = () => {
         document.title = `${a.title[Bi.lang]} · ${Bi.lang === "zh" ? "游戏与谜题设计" : "Game & Puzzle Design"}`;
@@ -113,12 +114,17 @@
       };
       script.onerror = () => {
         const box = el("div", "placeholder");
-        box.appendChild(Bi.seg({
+        box.appendChild(Bi.seg(pdfUrl ? {
           zh: "这篇文章的正文还没有翻译。可以先在 PDF 中阅读原文。",
           en: "The body of this article has not been translated yet. You can read the original in the PDF.",
+        } : {
+          zh: "这篇文章的正文还没有翻译。",
+          en: "The body of this article has not been translated yet.",
         }, "p"));
-        box.appendChild(pdf.cloneNode(true));
-        box.lastChild.replaceChildren(Bi.seg({ zh: `跳到 PDF 第 ${a.page} 页 ↗`, en: `Jump to page ${a.page} ↗` }));
+        if (pdfUrl) {
+          box.appendChild(pdf.cloneNode(true));
+          box.lastChild.replaceChildren(Bi.seg({ zh: `跳到 PDF 第 ${a.page} 页 ↗`, en: `Jump to page ${a.page} ↗` }));
+        }
         $("body").appendChild(box);
       };
       document.head.appendChild(script);
