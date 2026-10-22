@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>游戏与谜题设计</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Noto+Serif+SC:wght@400;500;600&display=swap">
+  <link rel="stylesheet" href="assets/style.css">
+  <script src="assets/toc-data.js"></script>
+  <script src="assets/bilingual.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="index.html">G&amp;PD</a>
+    <div class="right" id="topbar-right"></div>
+  </header>
+
+  <main class="wrap">
+    <nav class="crumbs" id="crumbs"></nav>
+    <header class="article-head" id="head"></header>
+    <article class="body" id="body"></article>
+    <nav class="pager" id="pager"></nav>
+  </main>
+
+  <script>
+    // 正文译文放在 articles/<id>.js,格式:
+    // window.GAPD_ARTICLE = { blocks: [ { type: "p" | "h2", zh: "…", en: "…" }, … ] };
+    // 每个 block 就是一个中英对照单位,选中后切换语言即可定位对应原文。
+    const $ = (id) => document.getElementById(id);
+    const el = (tag, cls, text) => {
+      const e = document.createElement(tag);
+      if (cls) e.className = cls;
+      if (text != null) e.textContent = text;
+      return e;
+    };
+
+    Bi.mountSwitch($("topbar-right"));
+
+    const id = new URLSearchParams(location.search).get("id");
+    const a = GAPD.byId[id];
+
+    if (!a) {
+      $("head").appendChild(Bi.seg({ zh: "找不到这篇文章", en: "Article not found" }, "h1"));
+    } else {
+      const crumbs = $("crumbs");
+      const home = el("a");
+      home.href = `index.html#${a.issue.id}`;
+      home.appendChild(Bi.seg({ zh: "目录", en: "Contents" }));
+      crumbs.append(home, " / ", Bi.seg(a.issue.label), ` · ${a.issue.year}`);
+
+      const pages = a.endPage ? `pp. ${a.page}–${a.endPage}` : `p. ${a.page}`;
+      const facts = el("div", "facts");
+      facts.append(el("span", null, pages));
+      const pdf = el("a", "btn");
+      pdf.href = GAPD.pdfHref(a.page);
+      pdf.target = "_blank";
+      pdf.appendChild(Bi.seg({ zh: "在 PDF 中打开原文 ↗", en: "Open original in PDF ↗" }));
+
+      $("head").append(
+        Bi.seg(a.section, "span", "k"),
+        Bi.seg(a.title, "h1"),
+        el("div", "a", a.authors),
+        facts,
+      );
+      facts.appendChild(pdf);
+
+      const setTitle = () => {
+        document.title = `${a.title[Bi.lang]} · ${Bi.lang === "zh" ? "游戏与谜题设计" : "Game & Puzzle Design"}`;
+      };
+      document.addEventListener("bi:lang", setTitle);
+      setTitle();
+
+      // 上一篇 / 下一篇(跨期连续)
+      const all = GAPD.issues.flatMap((iss) => iss.articles);
+      const i = all.findIndex((x) => x.id === a.id);
+      [[all[i - 1], "prev", { zh: "← 上一篇", en: "← Previous" }],
+       [all[i + 1], "next", { zh: "下一篇 →", en: "Next →" }]].forEach(([x, cls, dir]) => {
+        if (!x) return;
+        const link = el("a", cls);
+        link.href = `article.html?id=${x.id}`;
+        link.append(Bi.seg(dir, "span", "dir"), Bi.seg(x.title));
+        $("pager").appendChild(link);
+      });
+
+      // 尝试加载正文译文
+      const script = document.createElement("script");
+      script.src = `articles/${a.id}.js`;
+      script.onload = () => {
+        const body = $("body");
+        let notes = null;
+        (window.GAPD_ARTICLE?.blocks || []).forEach((b) => {
+          if (b.type === "figure") {
+            const fig = el("figure");
+            const img = el("img");
+            img.src = b.src;
+            img.alt = b.en;
+            if (b.width) img.style.maxWidth = `${b.width}px`;
+            fig.append(img, Bi.seg(b, "figcaption"));
+            body.appendChild(fig);
+          } else if (b.type === "note") {
+            if (!notes) {
+              notes = el("aside", "notes");
+              notes.appendChild(Bi.seg({ zh: "注释", en: "Notes" }, "h4"));
+              body.appendChild(notes);
+            }
+            notes.appendChild(Bi.seg(b, "p"));
+          } else {
+            const tag = { h2: "h2", h3: "h3", quote: "blockquote" }[b.type] || "p";
+            body.appendChild(Bi.seg(b, tag, b.type));
+          }
+        });
+      };
+      script.onerror = () => {
+        const box = el("div", "placeholder");
+        box.appendChild(Bi.seg({
+          zh: "这篇文章的正文还没有翻译。可以先在 PDF 中阅读原文。",
+          en: "The body of this article has not been translated yet. You can read the original in the PDF.",
+        }, "p"));
+        box.appendChild(pdf.cloneNode(true));
+        box.lastChild.replaceChildren(Bi.seg({ zh: `跳到 PDF 第 ${a.page} 页 ↗`, en: `Jump to page ${a.page} ↗` }));
+        $("body").appendChild(box);
+      };
+      document.head.appendChild(script);
+    }
+  </script>
+</body>
+</html>
