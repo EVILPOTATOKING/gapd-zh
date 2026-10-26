@@ -107,7 +107,7 @@
             }
             notes.appendChild(Bi.seg(b, "p"));
           } else {
-            const tag = { h2: "h2", h3: "h3", quote: "blockquote" }[b.type] || "p";
+            const tag = { h2: "h2", h3: "h3", h4: "h4", quote: "blockquote" }[b.type] || "p";
             body.appendChild(Bi.seg(b, tag, b.type));
           }
         });

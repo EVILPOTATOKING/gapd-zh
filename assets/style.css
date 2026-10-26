@@ -187,6 +187,12 @@ html[data-lang="zh"] .body p.lead { font-style: normal; }
 }
 html[data-lang="zh"] .body blockquote { font-style: normal; }
 .body p.cite { padding-left: 28px; margin-top: .6em; color: var(--ink-soft); }
+.body h4 { font-size: 16px; font-weight: 600; margin: 1.6em 0 .3em; color: var(--ink-soft); }
+.body p.li { margin: 0 0 .5em; padding-left: 1.4em; text-align: left; }
+.body p.box {
+  margin: 0 0 .6em; padding: 10px 16px; text-align: left;
+  background: var(--paper-raised); border-left: 3px solid var(--rule); border-radius: 2px;
+}
 .body p.bio { font-size: 15px; color: var(--ink-soft); }
 .body p.ref {
   font-size: 14px; color: var(--ink-soft); text-align: left;
